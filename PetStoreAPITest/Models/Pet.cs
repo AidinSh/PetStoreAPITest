@@ -1,19 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
+using PetStoreAPITest.Models;
 
-namespace PetStoreAPITest.Models
+namespace PetstoreApiTest.Models
 {
     public class Pet
     {
+        [JsonProperty("id")]
         public long Id { get; set; }
-        public Category Category { get; set; } = new Category();
-        public string Name { get; set; } = string.Empty;
-        public List<string> PhotoUrls { get; set; } = new List<string>();
-        public List<Tag> Tags { get; set; } = new List<Tag>();
-        public string Status { get; set; } = string.Empty; 
 
+        [JsonProperty("category")]
+        public Category Category { get; set; } = new();
+
+        [JsonProperty("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonProperty("photoUrls")]
+        public List<string> PhotoUrls { get; set; } = new();
+
+        [JsonProperty("tags")]
+        public List<Tag> Tags { get; set; } = new();
+
+        [JsonProperty("status")]
+        public PetStatus Status { get; set; } = PetStatus.Available;
     }
 }
