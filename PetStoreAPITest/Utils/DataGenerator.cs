@@ -11,7 +11,7 @@ namespace PetstoreApiTests.Utils
         private static readonly Random _random = new();
 
         public static Pet GeneratePet(    
-            PetStatus status = PetStatus.Available,
+            PetStatus status = PetStatus.AVAILABLE,
             string ?name = null,
             Category ?category = null,
             List<Tag> ?tags = null
@@ -33,6 +33,7 @@ namespace PetstoreApiTests.Utils
                 },
                 Status = status
             };
+
         }
 
     }

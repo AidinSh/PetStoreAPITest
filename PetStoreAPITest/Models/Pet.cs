@@ -22,6 +22,6 @@ namespace PetstoreApiTest.Models
         public List<Tag> Tags { get; set; } = new();
 
         [JsonProperty("status")]
-        public PetStatus Status { get; set; } = PetStatus.Available;
+        public PetStatus Status { get; set; } = PetStatus.AVAILABLE;
     }
 }

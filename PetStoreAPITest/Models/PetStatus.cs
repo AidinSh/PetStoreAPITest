@@ -8,12 +8,12 @@ namespace PetstoreApiTest.Models
     public enum PetStatus
     {
         [EnumMember(Value = "available")]
-        Available,
+        AVAILABLE,
 
         [EnumMember(Value = "pending")]
-        Pending,
+        PENDING,
 
         [EnumMember(Value = "sold")]
-        Sold
+        SOLD
     }
 }

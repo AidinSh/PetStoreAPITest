@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -6,7 +7,6 @@ using FluentAssertions;
 using Newtonsoft.Json;
 using PetstoreApiTest.Clients;
 using PetstoreApiTest.Models;
-using PetStoreAPITest.Context;
 using PetstoreApiTests.Utils;
 using Reqnroll;
 
@@ -17,7 +17,7 @@ namespace PetStoreAPITest.StepDefinitions
     {
         private readonly PetApiClient _client;
         private ScenarioContext _scenarioContext;
-        private Pet ?_pet;
+        private Pet _pet;
         private HttpResponseMessage _response;
 
         public PetsStepDefinitions(ScenarioContext scenarioContext)
@@ -34,11 +34,9 @@ namespace PetStoreAPITest.StepDefinitions
         }
 
         [When("I create a new pet in the Store")]
-        public async Task WhenICreateANewPetInTheStore()
+        public async Task CreateANewPetInTheStore()
         {
-            _response = await _client.CreatePetAsync(_pet);
-            if (_response.IsSuccessStatusCode)
-                _scenarioContext["CreatedPet"] = _pet;
+            _response = await CreateANewPet(_pet);
         }
 
         [When("I retrieve the pet by ID")]
@@ -46,50 +44,61 @@ namespace PetStoreAPITest.StepDefinitions
         {
             var getResponse = await _client.GetPetByIDWithRetryAsync(_pet.Id, 5);
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            _pet = JsonConvert.DeserializeObject<Pet>(await getResponse.Content.ReadAsStringAsync());
+            _pet = JsonConvert.DeserializeObject<Pet>(await getResponse.Content.ReadAsStringAsync())!;
         }
 
         [Then("I verify the pet details")]
         public void ThenIVerifyThePetDetails()
         {
             var createdPet = (Pet)_scenarioContext["CreatedPet"];
-            _pet.Name.Should().Be(createdPet.Name, "because pet name should be the same");
-            _pet.Id.Should().Be(createdPet.Id, "because pet Id should be the same");
-            _pet.Status.Should().Be(createdPet.Status, "because pet status should be the same");
-            _pet.Category.Name.Should().Be(createdPet.Category.Name, "because pet category should be the same");
-            _pet.Category.Id.Should().Be(createdPet.Category.Id, "because pet category Id should be the same");
-            _pet.PhotoUrls.Should().BeEquivalentTo(createdPet.PhotoUrls, "because photo URLs should be the same");
-            _pet.Tags.Should().BeEquivalentTo(createdPet.Tags, "because tags should be the same");
+            _pet.Name.Should().Be(createdPet.Name);
+            _pet.Id.Should().Be(createdPet.Id);
+            _pet.Status.Should().Be(createdPet.Status);
+            _pet.Category.Name.Should().Be(createdPet.Category.Name);
+            _pet.Category.Id.Should().Be(createdPet.Category.Id);
+            _pet.PhotoUrls.Should().BeEquivalentTo(createdPet.PhotoUrls);
+            _pet.Tags.Should().BeEquivalentTo(createdPet.Tags);
         }
 
         [Given("I have an existing pet")]
-        public void GivenIHaveAnExistingPet()
+        public async Task GivenIHaveAnExistingPet()
         {
-            throw new PendingStepException();
+            _pet = DataGenerator.GeneratePet();
+            await CreateANewPet(_pet);
         }
 
-        [When("I update the pet details")]
-        public void WhenIUpdateThePetDetails()
+        [When("I update the pet name")]
+        public async Task WhenIUpdateThePetDetails()
         {
-            throw new PendingStepException();
+            _pet.Name = "Updated_Pet_Name";
+            var response = await _client.UpdatePetAsync(_pet);
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            _scenarioContext["CreatedPet"] = _pet;
         }
 
-        [Given("I have pets with various statuses")]
-        public void GivenIHavePetsWithVariousStatuses()
+        [Given("I have at least one (.*) pet")]
+        public async Task GivenIHaveAtLeastOnePet(PetStatus status)
         {
-            throw new PendingStepException();
+            _pet = DataGenerator.GeneratePet(status);
+            var response = await _client.CreatePetAsync(_pet);
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
-        [When("I search for pets by status {string}")]
-        public void WhenISearchForPetsByStatus(string available)
+        [When("I search for pets by status (.*)")]
+        public async Task WhenISearchForPetsByStatus(PetStatus status)
         {
-            throw new PendingStepException();
+            _response = await _client.FindPetsByStatusAsync(status);
+            _response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
-        [Then("I verify the search results contain only pets with status {string}")]
-        public void ThenIVerifyTheSearchResultsContainOnlyPetsWithStatus(string available)
+        [Then("I verify the search results contain only pets with status (.*)")]
+        public async Task ThenIVerifyTheSearchResultsContainOnlyPetsWithStatus(PetStatus status)
         {
-            throw new PendingStepException();
+            var listOfPets = JsonConvert.DeserializeObject<List<Pet>>(await(_response).Content.ReadAsStringAsync());
+            foreach (var pet in listOfPets!)
+            {
+                pet.Status.Should().Be(status);
+            }
         }
 
         [Then("I validate the response schema for the search results")]
@@ -108,6 +117,14 @@ namespace PetStoreAPITest.StepDefinitions
         public void ThenIVerifyThePetIsDeletedSuccessfully()
         {
             throw new PendingStepException();
+        }
+
+        private async Task<HttpResponseMessage> CreateANewPet(Pet pet)
+        {
+            var response = await _client.CreatePetAsync(pet);
+            if (response.IsSuccessStatusCode)
+                _scenarioContext["CreatedPet"] = pet;
+            return response;
         }
     }
 }

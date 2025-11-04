@@ -170,7 +170,7 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
  await testRunner.GivenAsync("I have an existing pet", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 14
- await testRunner.WhenAsync("I update the pet details", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+ await testRunner.WhenAsync("I update the pet name", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 15
  await testRunner.AndAsync("I retrieve the pet by ID", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
@@ -203,7 +203,7 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             {
                 await this.ScenarioStartAsync();
 #line 19
- await testRunner.GivenAsync("I have pets with various statuses", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+ await testRunner.GivenAsync("I have at least one \'available\' pet", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 20
  await testRunner.WhenAsync("I search for pets by status \'available\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
