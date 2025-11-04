@@ -10,6 +10,7 @@ namespace PetStoreAPITest.Utils
 {
     public class StepHelpers
     {
+        // Transforms a string status to the corresponding PetStatus enum
         [StepArgumentTransformation]
         public PetStatus TransformStatus(string status)
         {

@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 using PetStoreAPITest.Utils;
 using PetstoreApiTest.Models;
 using System.Net;
-using System.Runtime.CompilerServices;
 
 
 namespace PetstoreApiTest.Clients
@@ -22,6 +21,7 @@ namespace PetstoreApiTest.Clients
                 BaseAddress = new Uri(ConfigManager.BaseUrl)
             };
 
+            //It is not neccessary to authenticate for using these APIs but it is just for demonstration
             if (!string.IsNullOrEmpty(ConfigManager.ApiKey))
                 _client.DefaultRequestHeaders.Add("api_key", ConfigManager.ApiKey);
 
@@ -38,6 +38,7 @@ namespace PetstoreApiTest.Clients
             return await _client.GetAsync($"pet/{id}");
         }
 
+        //This method is used because the service is unstable and retring helps to get rid of flakiness
         public async Task<HttpResponseMessage> GetPetByIDWithRetryAsync(long id, int maxRetries)
         {
             var response = await GetPetByIdAsync(id);
@@ -63,6 +64,7 @@ namespace PetstoreApiTest.Clients
             return await _client.DeleteAsync($"pet/{id}");
         }
 
+        //Same as GetPet API this service is also unstable
         public async Task<HttpResponseMessage> DeletePetWithRetryAsync(long id, int maxRetries)
         {
             var response = await DeletePetAsync(id);

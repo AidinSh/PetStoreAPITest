@@ -10,6 +10,7 @@ using Newtonsoft.Json.Schema;
 
 namespace PetStoreAPITest.Utils
 {
+    //Generates JSON Schemas for validating API responses
     public class SchemaGenerator
     {
         public JSchema FindPetByStatusSchema()
