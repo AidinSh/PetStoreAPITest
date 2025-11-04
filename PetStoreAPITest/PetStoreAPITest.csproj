@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="8.8.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.10" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
@@ -16,9 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\" />
     <Folder Include="Hooks\" />
-    <Folder Include="StepDefinitions\" />
   </ItemGroup>
 
 </Project>

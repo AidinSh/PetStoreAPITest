@@ -7,7 +7,7 @@ using PetStoreAPITest.Utils;
 using PetstoreApiTest.Models;
 
 
-namespace PetstoreApiTests.Clients
+namespace PetstoreApiTest.Clients
 {
     public class PetApiClient
     {
