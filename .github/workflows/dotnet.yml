@@ -23,3 +23,13 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+      
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+    - name: Generate HTML report
+      run: reportgenerator "-reports:**/test_results.trx" "-targetdir:TestReport" -reporttypes:Html
+    - name: Upload HTML report
+      uses: actions/upload-artifact@v4
+      with:
+        name: html-report
+        path: TestReport
