@@ -203,13 +203,13 @@ this.ScenarioInitialize(scenarioInfo, ruleInfo);
             {
                 await this.ScenarioStartAsync();
 #line 19
- await testRunner.GivenAsync("I have at least one \'available\' pet", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+ await testRunner.GivenAsync("I have at least one AVAILABLE pet", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 20
- await testRunner.WhenAsync("I search for pets by status \'available\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+ await testRunner.WhenAsync("I search for pets by status AVAILABLE", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 21
- await testRunner.ThenAsync("I verify the search results contain only pets with status \'available\'", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+ await testRunner.ThenAsync("I verify the search results contain only pets with status AVAILABLE", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 22
  await testRunner.AndAsync("I validate the response schema for the search results", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");

@@ -16,9 +16,9 @@ Scenario: Update and Verify a Pet
 	Then I verify the pet details
 
 Scenario: Find Pet by Status 
-	Given I have at least one 'AVAILABLE' pet
-	When I search for pets by status 'AVAILABLE'
-	Then I verify the search results contain only pets with status 'AVAILABLE'
+	Given I have at least one AVAILABLE pet
+	When I search for pets by status AVAILABLE
+	Then I verify the search results contain only pets with status AVAILABLE
 	And I validate the response schema for the search results
 
 Scenario: Delete a pet 

@@ -23,5 +23,6 @@ namespace PetStoreAPITest.Utils
         }
 
         public static string BaseUrl => _config["BaseUrl"] ?? string.Empty;
+        public static string ApiKey => _config["ApiKey"] ?? string.Empty;
     }
 }

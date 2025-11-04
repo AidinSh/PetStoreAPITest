@@ -1,12 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
+using NUnit.Framework;
 using PetstoreApiTest.Clients;
 using PetstoreApiTest.Models;
+using PetStoreAPITest.Utils;
 using PetstoreApiTests.Utils;
 using Reqnroll;
 
@@ -19,11 +24,13 @@ namespace PetStoreAPITest.StepDefinitions
         private ScenarioContext _scenarioContext;
         private Pet _pet;
         private HttpResponseMessage _response;
+        private SchemaGenerator _schemaGenerator;
 
         public PetsStepDefinitions(ScenarioContext scenarioContext)
         {
             _client = new PetApiClient();
             _scenarioContext = scenarioContext;
+            _schemaGenerator = new SchemaGenerator();
         }
 
         [Given("I have a new pet")]
@@ -102,21 +109,24 @@ namespace PetStoreAPITest.StepDefinitions
         }
 
         [Then("I validate the response schema for the search results")]
-        public void ThenIValidateTheResponseSchemaForTheSearchResults()
+        public async Task ThenIValidateTheResponseSchemaForTheSearchResults()
         {
-            throw new PendingStepException();
+            JArray jsonResponse = JArray.Parse(await _response.Content.ReadAsStringAsync());
+            var isValid = jsonResponse.IsValid(_schemaGenerator.FindPetByStatusSchema(), out IList<string> errorMessages);
+            Assert.That(isValid, Is.True, "Schema validation failed: " + string.Join("\n ", errorMessages));        
         }
 
         [When("I delete the pet by ID")]
-        public void WhenIDeleteThePetByID()
+        public async Task WhenIDeleteThePetByID()
         {
-            throw new PendingStepException();
+            await _client.DeletePetWithRetryAsync(_pet.Id, 5);
         }
 
         [Then("I verify the pet is deleted successfully")]
-        public void ThenIVerifyThePetIsDeletedSuccessfully()
+        public async Task ThenIVerifyThePetIsDeletedSuccessfully()
         {
-            throw new PendingStepException();
+            var getResponse = await _client.GetPetByIdAsync(_pet.Id);
+            getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
         private async Task<HttpResponseMessage> CreateANewPet(Pet pet)
