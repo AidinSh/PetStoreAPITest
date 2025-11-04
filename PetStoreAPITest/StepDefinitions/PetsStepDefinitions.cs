@@ -16,14 +16,14 @@ namespace PetStoreAPITest.StepDefinitions
     public class PetsStepDefinitions
     {
         private readonly PetApiClient _client;
-        private PetContext _petContext;
-        private Pet _pet;
+        private ScenarioContext _scenarioContext;
+        private Pet ?_pet;
         private HttpResponseMessage _response;
 
-        public PetsStepDefinitions(PetContext petContext)
+        public PetsStepDefinitions(ScenarioContext scenarioContext)
         {
             _client = new PetApiClient();
-            _petContext = petContext;
+            _scenarioContext = scenarioContext;
         }
 
         [Given("I have a new pet")]
@@ -38,25 +38,28 @@ namespace PetStoreAPITest.StepDefinitions
         {
             _response = await _client.CreatePetAsync(_pet);
             if (_response.IsSuccessStatusCode)
-                _petContext.CreatedPet = _pet;
+                _scenarioContext["CreatedPet"] = _pet;
         }
 
         [When("I retrieve the pet by ID")]
         public async Task WhenIRetrieveThePetByID()
         {
-            var getResponse = await _client.GetPetByIdAsync(_pet.Id);
+            var getResponse = await _client.GetPetByIDWithRetryAsync(_pet.Id, 5);
             getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            var petData = JsonConvert.DeserializeObject<Pet>(await getResponse.Content.ReadAsStringAsync());
-            petData.Id.Should().Be(_pet.Id);
+            _pet = JsonConvert.DeserializeObject<Pet>(await getResponse.Content.ReadAsStringAsync());
         }
 
         [Then("I verify the pet details")]
-        public async Task ThenIVerifyThePetDetails()
+        public void ThenIVerifyThePetDetails()
         {
-            _response.StatusCode.Should().Be(HttpStatusCode.OK);
-            var content = await _response.Content.ReadAsStringAsync();
-            var responsePet = JsonConvert.DeserializeObject<Pet>(content);
-            responsePet.Name.Should().Be(_pet.Name);
+            var createdPet = (Pet)_scenarioContext["CreatedPet"];
+            _pet.Name.Should().Be(createdPet.Name, "because pet name should be the same");
+            _pet.Id.Should().Be(createdPet.Id, "because pet Id should be the same");
+            _pet.Status.Should().Be(createdPet.Status, "because pet status should be the same");
+            _pet.Category.Name.Should().Be(createdPet.Category.Name, "because pet category should be the same");
+            _pet.Category.Id.Should().Be(createdPet.Category.Id, "because pet category Id should be the same");
+            _pet.PhotoUrls.Should().BeEquivalentTo(createdPet.PhotoUrls, "because photo URLs should be the same");
+            _pet.Tags.Should().BeEquivalentTo(createdPet.Tags, "because tags should be the same");
         }
 
         [Given("I have an existing pet")]

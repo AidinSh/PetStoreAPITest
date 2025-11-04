@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using PetStoreAPITest.Utils;
 using PetstoreApiTest.Models;
+using System.Net;
 
 
 namespace PetstoreApiTest.Clients
@@ -30,6 +31,20 @@ namespace PetstoreApiTest.Clients
         public async Task<HttpResponseMessage> GetPetByIdAsync(long id)
         {
             return await _client.GetAsync($"pet/{id}");
+        }
+
+        public async Task<HttpResponseMessage> GetPetByIDWithRetryAsync(long id, int maxRetries)
+        {
+            var response = await GetPetByIdAsync(id);
+            for (int i=0; i< maxRetries; i++)
+            {
+                response = await GetPetByIdAsync(id);
+                if (response.StatusCode.Equals(HttpStatusCode.OK)) {
+                    return response;
+                }
+                await Task.Delay(1000);
+            }
+            return response;
         }
 
         public async Task<HttpResponseMessage> UpdatePetAsync(Pet pet)
