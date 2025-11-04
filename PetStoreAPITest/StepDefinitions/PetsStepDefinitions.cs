@@ -1,11 +1,14 @@
 using System;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using PetstoreApiTest.Models;
+using FluentAssertions;
+using Newtonsoft.Json;
 using PetstoreApiTest.Clients;
+using PetstoreApiTest.Models;
+using PetStoreAPITest.Context;
 using PetstoreApiTests.Utils;
 using Reqnroll;
-using PetStoreAPITest.Context;
 
 namespace PetStoreAPITest.StepDefinitions
 {
@@ -27,6 +30,7 @@ namespace PetStoreAPITest.StepDefinitions
         public void GivenIHaveANewPet()
         {
             _pet = DataGenerator.GeneratePet();
+            Console.WriteLine($"Generated Pet ID: {_pet.Id}, Name: {_pet.Name}");
         }
 
         [When("I create a new pet in the Store")]
@@ -38,15 +42,21 @@ namespace PetStoreAPITest.StepDefinitions
         }
 
         [When("I retrieve the pet by ID")]
-        public void WhenIRetrieveThePetByID()
+        public async Task WhenIRetrieveThePetByID()
         {
-            throw new PendingStepException();
+            var getResponse = await _client.GetPetByIdAsync(_pet.Id);
+            getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            var petData = JsonConvert.DeserializeObject<Pet>(await getResponse.Content.ReadAsStringAsync());
+            petData.Id.Should().Be(_pet.Id);
         }
 
         [Then("I verify the pet details")]
-        public void ThenIVerifyThePetDetails()
+        public async Task ThenIVerifyThePetDetails()
         {
-            throw new PendingStepException();
+            _response.StatusCode.Should().Be(HttpStatusCode.OK);
+            var content = await _response.Content.ReadAsStringAsync();
+            var responsePet = JsonConvert.DeserializeObject<Pet>(content);
+            responsePet.Name.Should().Be(_pet.Name);
         }
 
         [Given("I have an existing pet")]
