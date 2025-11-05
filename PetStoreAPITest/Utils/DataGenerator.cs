@@ -11,7 +11,7 @@ namespace PetstoreApiTests.Utils
         private static readonly Random _random = new();
 
         //Generates a random Pet , but you can also create a pet with desired specifications by passing parameters
-        public static Pet GeneratePet(    
+        public static Pet GeneratePet(
             PetStatus status = PetStatus.AVAILABLE,
             string ?name = null,
             Category ?category = null,
@@ -20,7 +20,7 @@ namespace PetstoreApiTests.Utils
         {
             return new Pet
             {
-                Id = DateTime.UtcNow.Ticks/100,
+                Id = DateTime.UtcNow.Ticks / 100,
                 Name = name ?? $"New_Pet{_random.Next(1000, 9999)}",
                 Category = category ?? new Category
                 {
