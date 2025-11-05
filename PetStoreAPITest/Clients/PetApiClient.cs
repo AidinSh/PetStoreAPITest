@@ -47,7 +47,7 @@ namespace PetstoreApiTest.Clients
                 if (response.StatusCode.Equals(HttpStatusCode.OK)) {
                     return response;
                 }
-                await Task.Delay(1000);
+                await Task.Delay(100);
                 response = await GetPetByIdAsync(id);
             }
             return response;
@@ -74,7 +74,7 @@ namespace PetstoreApiTest.Clients
                 {
                     return response;
                 }
-                await Task.Delay(1000);
+                await Task.Delay(100);
                 response = await DeletePetAsync(id);
             }
             return response;

@@ -21,8 +21,8 @@ namespace PetStoreAPITest.StepDefinitions
     {
         private readonly PetApiClient _client;
         private ScenarioContext _scenarioContext;
-        private Pet _pet;
-        private HttpResponseMessage _response;
+        private Pet? _pet;
+        private HttpResponseMessage? _response;
         private SchemaGenerator _schemaGenerator;
 
         public PetsStepDefinitions(ScenarioContext scenarioContext)
@@ -35,7 +35,7 @@ namespace PetStoreAPITest.StepDefinitions
         [Given("Have a new Pet")]
         public void HaveANewPet()
         {
-            _pet = DataGenerator.GeneratePet();  
+            _pet = DataGenerator.GeneratePet();
         }
 
         [Given("Have an existing pet")]
@@ -51,6 +51,7 @@ namespace PetStoreAPITest.StepDefinitions
             _pet = DataGenerator.GeneratePet(status);
             var response = await _client.CreatePetAsync(_pet);
             response.StatusCode.Should().Be(HttpStatusCode.OK);
+            _scenarioContext["CreatedPet"] = _pet;
         }
 
 
@@ -69,15 +70,16 @@ namespace PetStoreAPITest.StepDefinitions
         [When("Create a new pet in the store")]
         public async Task CreateANewPetInTheStore()
         {
-            _response = await CreateANewPet(_pet);
+            _response = await CreateANewPet(_pet!);
         }
 
         [When("Retrieve the pet by ID")]
         public async Task RetrieveThePetByID()
         {
-            var getResponse = await _client.GetPetByIDWithRetryAsync(_pet.Id, 5);
-            getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            _scenarioContext["RetrivedPet"] = JsonConvert.DeserializeObject<Pet>(await getResponse.Content.ReadAsStringAsync())!;
+            _response = await _client.GetPetByIDWithRetryAsync(_pet!.Id, 5);
+            //getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            if (_response.StatusCode == HttpStatusCode.OK)
+                _scenarioContext["RetrivedPet"] = JsonConvert.DeserializeObject<Pet>(await _response.Content.ReadAsStringAsync())!;
         }
 
         [When("Search for pets by status (.*)")]
@@ -90,16 +92,17 @@ namespace PetStoreAPITest.StepDefinitions
         [When("Delete Pet by ID")]
         public async Task DeletePetByID()
         {
-            await _client.DeletePetWithRetryAsync(_pet.Id, 5);
+            _response = await _client.DeletePetWithRetryAsync(_pet!.Id, 5); //Deleting pet with retry to avoid flakiness
         }
 
 
         [Then("Verify Pet details")]
         public void VerifyThePetDetails()
         {
-            var createdPet = (Pet)_scenarioContext["CreatedPet"];
+            _response!.StatusCode.Should().Be(HttpStatusCode.OK); //Checks status code 
+            var createdPet = (Pet)_scenarioContext["CreatedPet"]; 
             var retrivedPet = (Pet)_scenarioContext["RetrivedPet"];
-            retrivedPet.Name.Should().Be(createdPet.Name);
+            retrivedPet.Name.Should().Be(createdPet.Name); //checking all fields of Pet
             retrivedPet.Id.Should().Be(createdPet.Id);
             retrivedPet.Status.Should().Be(createdPet.Status);
             retrivedPet.Category.Name.Should().Be(createdPet.Category.Name);
@@ -113,13 +116,13 @@ namespace PetStoreAPITest.StepDefinitions
         {
             var retrivedPet = (Pet)_scenarioContext["RetrivedPet"];
             var updatedPet = (Pet)_scenarioContext["UpdatedPet"];
-            _pet.Name.Should().Be(retrivedPet.Name);
+            _pet!.Name.Should().Be(retrivedPet.Name);
         }
 
         [Then("Verify search results contain only pets with status (.*)")]
         public async Task VerifySearchResultsContainOnlyPetsWithStatus(PetStatus status)
         {
-            var listOfPets = JsonConvert.DeserializeObject<List<Pet>>(await (_response).Content.ReadAsStringAsync());
+            var listOfPets = JsonConvert.DeserializeObject<List<Pet>>(await (_response!).Content.ReadAsStringAsync());
             foreach (var pet in listOfPets!)
             {
                 pet.Status.Should().Be(status);
@@ -129,7 +132,7 @@ namespace PetStoreAPITest.StepDefinitions
         [Then("Validate the response schema for search results")]
         public async Task ValidateResponseSchemaForSearchResults()
         {
-            JArray jsonResponse = JArray.Parse(await _response.Content.ReadAsStringAsync());
+            JArray jsonResponse = JArray.Parse(await _response!.Content.ReadAsStringAsync());
             var isValid = jsonResponse.IsValid(_schemaGenerator.FindPetByStatusSchema(), out IList<string> errorMessages);
             Assert.That(isValid, Is.True, "Schema validation failed: " + string.Join("\n ", errorMessages));
         }
@@ -137,10 +140,23 @@ namespace PetStoreAPITest.StepDefinitions
         [Then("Verify the pet is deleted successfully")]
         public async Task VerifyThePetIsDeletedSuccessfully()
         {
-            var getResponse = await _client.GetPetByIdAsync(_pet.Id);
+            var getResponse = await _client.GetPetByIdAsync(_pet!.Id);
             getResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
 
+        [Given("Have a non-existing pet ID")]
+        public async Task HaveANon_ExistingPetID()
+        {
+            _pet = DataGenerator.GeneratePet();
+            _pet.Id = 4321;
+            await _client.DeletePetWithRetryAsync(_pet.Id, 5);
+        }
+
+        [Then("Verify the response indicates pet not found")]
+        public void VerifyTheResponseIndicatesPetNotFound()
+        {
+            _response!.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
 
 
         private async Task<HttpResponseMessage> CreateANewPet(Pet pet)
@@ -149,7 +165,7 @@ namespace PetStoreAPITest.StepDefinitions
             if (response.IsSuccessStatusCode)
             {
                 _scenarioContext["CreatedPet"] = pet;
-                Console.WriteLine($"Generated Pet ID: {_pet.Id}, Name: {_pet.Name}");
+                Console.WriteLine($"Generated Pet ID: {_pet!.Id}, Name: {_pet.Name}");
             }     
             return response;
         }

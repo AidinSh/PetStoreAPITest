@@ -20,7 +20,7 @@ namespace PetStoreAPITest.Hooks
         [AfterScenario]
         public async Task Cleanup()
         {
-            if (_scenarioContext["CreatedPet"] != null)
+            if (_scenarioContext.ContainsKey("CreatedPet") && _scenarioContext["CreatedPet"] != null)
             {
                 Pet petToDelete = (Pet)_scenarioContext["CreatedPet"];
                 await _client.DeletePetWithRetryAsync(petToDelete.Id, 5);
