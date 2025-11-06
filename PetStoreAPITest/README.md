@@ -4,10 +4,9 @@ A SpecFlow + C# API automation framework for Swagger Petstore.
 
 ## Tech Stack
 - .NET 8
-- SpecFlow + NUnit
+- Req&Roll + NUnit
 - FluentAssertions
 - HttpClient
-- LivingDoc reporting
 
 ---
 
